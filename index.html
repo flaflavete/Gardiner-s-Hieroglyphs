@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gardiner's Hieroglyphs</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#c9a84c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="./gardiner_data.js"></script>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hieroglyphs">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'Noto Sans Egyptian Hieroglyphs';
+  src: url('NotoSansEgyptianHieroglyphs-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --bg:       #13131f;
+  --surface:  #1c1c2e;
+  --card:     #23233a;
+  --card-h:   #2c2c4a;
+  --border:   #2e2e4e;
+  --accent:   #c9a84c;
+  --accent-d: #a07828;
+  --red:      #e05c6e;
+  --green:    #4caf7a;
+  --text:     #e8e8f0;
+  --muted:    #7878a0;
+  --hier:     'Noto Sans Egyptian Hieroglyphs', 'Segoe UI Historic', serif;
+  --serif:    'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ─────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  height: 54px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.logo-glyph {
+  font-family: var(--hier);
+  font-size: 26px;
+  line-height: 1;
+  color: var(--accent);
+}
+.logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  color: var(--text);
+}
+.logo-sub {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.search-wrap {
+  margin-left: auto;
+  position: relative;
+}
+.search-wrap svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+#search {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px 7px 34px;
+  color: var(--text);
+  font-size: 13px;
+  width: 230px;
+  outline: none;
+  transition: border-color .15s;
+}
+#search:focus { border-color: var(--accent); }
+#search::placeholder { color: var(--muted); }
+
+/* ── BODY LAYOUT ─────────────────────────────────── */
+.body {
+  display: grid;
+  grid-template-columns: 190px 1fr 300px;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cat-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  text-align: left;
+  transition: background .12s, border-color .12s;
+}
+.cat-btn:hover { background: rgba(201,168,76,.08); }
+.cat-btn.active {
+  background: rgba(201,168,76,.13);
+  border-left-color: var(--accent);
+}
+.cat-code {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--accent);
+  min-width: 26px;
+  padding-top: 1px;
+}
+.cat-name {
+  color: var(--muted);
+  line-height: 1.35;
+  font-size: 11px;
+}
+.cat-btn.active .cat-name { color: var(--text); }
+
+/* ── SIGN GRID ───────────────────────────────────── */
+.main {
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-head {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.section-head h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.section-head p {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+}
+
+.sign {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 6px 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: background .12s, border-color .12s, transform .12s, box-shadow .12s;
+  user-select: none;
+}
+.sign:hover {
+  background: var(--card-h);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(201,168,76,.15);
+}
+.sign-g {
+  font-family: var(--hier);
+  font-size: 36px;
+  line-height: 1.1;
+  display: block;
+  min-height: 44px;
+}
+.sign-id {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 5px;
+  display: block;
+}
+.sign-ph {
+  font-family: var(--serif);
+  font-size: 12px;
+  color: var(--red);
+  display: block;
+  min-height: 17px;
+  margin-top: 1px;
+}
+.sign-desc {
+  font-size: 9.5px;
+  color: var(--muted);
+  line-height: 1.3;
+  margin-top: 2px;
+  display: block;
+}
+
+.search-info {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── WORD BUILDER (right panel) ──────────────────── */
+.builder {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.builder-section {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.builder-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* hieroglyphs display */
+.hier-display {
+  min-height: 52px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-family: var(--hier);
+  font-size: 40px;
+  line-height: 1.1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  cursor: default;
+}
+.hier-display.empty::after {
+  content: 'click the signs →';
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+}
+.h-token {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0 1px;
+  position: relative;
+  transition: background .1s;
+}
+.h-token:hover { background: rgba(224,92,110,.25); }
+.h-token:hover::after {
+  content: '×';
+  position: absolute;
+  top: -5px; right: -3px;
+  font-size: 9px;
+  font-family: sans-serif;
+  color: var(--red);
+}
+
+/* auto transliteration */
+.translit-auto {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--text);
+  min-height: 36px;
+  letter-spacing: .5px;
+  word-break: break-all;
+}
+.translit-auto.empty {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+}
+.translit-auto.empty::before { content: 'generated automatically'; }
+
+/* manual edit */
+.translit-edit {
+  width: 100%;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 12px;
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: 15px;
+  outline: none;
+  resize: vertical;
+  min-height: 36px;
+  max-height: 80px;
+  transition: border-color .15s;
+}
+.translit-edit:focus { border-color: var(--accent); }
+
+/* special keys */
+.keys-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.tkey {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 4px 9px;
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+  user-select: none;
+}
+.tkey:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+/* copy buttons */
+.btn-row {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.btn {
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 9px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn:hover { background: var(--card-h); border-color: var(--accent); color: var(--accent); }
+.btn.success { background: var(--green) !important; border-color: var(--green) !important; color: #fff !important; }
+.btn-clear { border-color: transparent; color: var(--muted); }
+.btn-clear:hover { border-color: var(--red); color: var(--red); background: rgba(224,92,110,.08); }
+
+/* vega search */
+.vega-info {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+.vega-info a { color: var(--accent); text-decoration: none; }
+.vega-info a:hover { text-decoration: underline; }
+.btn-vega {
+  text-decoration: none;
+  color: var(--accent);
+  border-color: rgba(201,168,76,.35);
+  background: rgba(201,168,76,.06);
+}
+.btn-vega:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.btn-vega.disabled { opacity: .35; pointer-events: none; }
+
+/* bibliography */
+.biblio {
+  padding: 9px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.biblio strong { color: var(--accent); font-size: 10px; display: block; margin-bottom: 2px; }
+.biblio em { font-style: italic; }
+
+/* ── PHONEME TAGS on cards ── */
+.sign-ph-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  min-height: 17px;
+  margin-top: 2px;
+}
+.ph-tag {
+  font-family: var(--serif);
+  font-size: 10px;
+  color: var(--red);
+  background: rgba(224,92,110,.12);
+  border-radius: 4px;
+  padding: 1px 4px;
+  line-height: 1.4;
+}
+
+/* ── PHONEME PICKER popup ── */
+#ph-picker {
+  position: fixed;
+  z-index: 1000;
+  width: 220px;
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  animation: pop-in .12s ease;
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.pk-title {
+  font-family: var(--hier);
+  font-size: 28px;
+  text-align: center;
+  line-height: 1.1;
+  color: var(--accent);
+}
+.pk-title span {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-left: 6px;
+}
+.pk-desc {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  margin: 4px 0 10px;
+}
+.pk-opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+}
+.pk-btn {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all .12s;
+}
+.pk-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.pk-det {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  color: var(--muted);
+  width: 100%;
+  margin-top: 2px;
+}
+.pk-det:hover { background: var(--card-h); color: var(--muted); border-color: var(--muted); }
+
+.biblio-contact {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+.biblio-contact a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 10px;
+}
+.biblio-contact a:hover { text-decoration: underline; }
+
+
+/* ── HELP BUTTON ── */
+#btn-help {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  width: 30px; height: 30px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+#btn-help:hover { background: var(--accent); color: var(--bg); }
+
+/* ── WELCOME POPUP ── */
+#welcome-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  animation: fadein .25s ease;
+}
+#welcome-box {
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  border-radius: 18px;
+  padding: 36px 40px;
+  text-align: center;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+#welcome-glyph {
+  font-family: var(--hier);
+  font-size: 52px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+#welcome-box h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+#welcome-box p {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+#welcome-btns { display: flex; gap: 10px; justify-content: center; }
+#welcome-yes {
+  background: var(--accent); color: var(--bg);
+  border: none; border-radius: 9px;
+  padding: 10px 22px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity .15s;
+}
+#welcome-yes:hover { opacity: .85; }
+#welcome-no {
+  background: var(--card); color: var(--muted);
+  border: 1.5px solid var(--border); border-radius: 9px;
+  padding: 10px 22px; font-size: 13px;
+  cursor: pointer; transition: all .15s;
+}
+#welcome-no:hover { border-color: var(--muted); color: var(--text); }
+
+/* ── TUTORIAL MODAL ── */
+#tutorial-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,.75);
+  display: flex; align-items: center; justify-content: center;
+  animation: fadein .2s ease;
+}
+#tutorial-overlay[hidden] { display: none; }
+#tutorial-box {
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  border-radius: 18px;
+  padding: 36px 40px 24px;
+  max-width: 440px;
+  width: 92%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+#tut-close {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none;
+  color: var(--muted); font-size: 16px;
+  cursor: pointer; line-height: 1;
+}
+#tut-close:hover { color: var(--text); }
+
+.tut-step { display: none; text-align: center; }
+.tut-step.active { display: block; animation: fadein .2s ease; }
+.tut-icon {
+  font-family: var(--hier);
+  font-size: 44px;
+  color: var(--accent);
+  margin-bottom: 14px;
+  line-height: 1.1;
+}
+.tut-step h3 {
+  font-size: 16px; font-weight: 700;
+  color: var(--text); margin-bottom: 10px;
+}
+.tut-step p {
+  font-size: 13px; color: var(--muted);
+  line-height: 1.7; margin-bottom: 8px;
+}
+.tut-step p strong { color: var(--text); }
+
+#tut-nav {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  gap: 10px;
+}
+#tut-prev, #tut-next {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 8px 18px;
+  color: var(--text); font-size: 13px;
+  cursor: pointer; transition: all .15s;
+  white-space: nowrap;
+}
+#tut-prev:hover, #tut-next:hover { border-color: var(--accent); color: var(--accent); }
+#tut-prev:disabled { opacity: .3; pointer-events: none; }
+#tut-next.finish { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 600; }
+
+#tut-dots { display: flex; gap: 6px; }
+.tut-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--border); transition: background .2s;
+}
+.tut-dot.active { background: var(--accent); }
+
+@keyframes fadein { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:scale(1); } }
+
+
+/* ── SIGN ZOOM ON HOVER ── */
+/* ── TRANSPARENCY ON HOVER ── */
+.grid-section.zooming .sign:not(:hover) {
+  opacity: 0.2;
+  transition: opacity .2s;
+}
+
+/* ── PHONEME PICKER ── */
+#ph-picker {
+  position: fixed;
+  z-index: 2000;
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.7);
+  min-width: 200px;
+  animation: fadein .2s ease;
+}
+.pk-title {
+  font-size: 16px;
+  font-family: var(--hier);
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.pk-title span {
+  font-family: var(--serif);
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 6px;
+}
+.pk-desc {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.pk-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pk-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+.pk-btn:hover {
+  background: var(--card-h);
+  border-color: var(--accent);
+}
+.pk-btn.pk-det {
+  color: var(--muted);
+  margin-top: 4px;
+}
+.pk-btn.pk-det:hover {
+  color: var(--accent);
+}
+
+/* scrollbars */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── MOBILE TAB BAR ──────────────────────────────── */
+.mob-tabs { display: none; }
+
+@media (max-width: 640px) {
+  body { height: 100dvh; }
+
+  .logo-sub { display: none; }
+  .search-wrap { flex: 1; }
+  #search { width: 100%; }
+
+  .body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+  .body > * { display: none !important; }
+  .body[data-panel="sidebar"] > .sidebar { display: flex !important; }
+  .body[data-panel="main"]    > .main    { display: flex !important; }
+  .body[data-panel="builder"] > .builder { display: flex !important; }
+
+  .hier-display.empty::after { content: 'tap signs below'; }
+
+  .mob-tabs {
+    display: flex;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    height: 48px;
+  }
+  .mob-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    border-top: 2px solid transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color .12s, border-color .12s;
+    padding: 0;
+  }
+  .mob-tab.active { color: var(--accent); border-top-color: var(--accent); }
+}
+</style>
+</head>
+<body>
+
+<!-- WELCOME POPUP -->
+<div id="welcome-overlay">
+  <div id="welcome-box">
+    <div id="welcome-glyph">𓏟</div>
+    <h2>Gardiner Hieroglyphs</h2>
+    <p>Would you like a quick guide on how to use this tool?</p>
+    <div id="welcome-btns">
+      <button id="welcome-yes">Show me how</button>
+      <button id="welcome-no">Start directly</button>
+    </div>
+  </div>
+</div>
+
+<!-- TUTORIAL MODAL -->
+<div id="tutorial-overlay" hidden>
+  <div id="tutorial-box">
+    <button id="tut-close">✕</button>
+    <div id="tut-steps">
+
+      <div class="tut-step active" data-step="1">
+        <div class="tut-icon">𓏟</div>
+        <h3>Browse by Category</h3>
+        <p>Use the <strong>left sidebar</strong> to navigate the 26 Gardiner sign categories — from <em>A (Man)</em> to <em>Aa (Unclassified)</em>. You can also use the <strong>search bar</strong> at the top to find signs by number, phoneme or description.</p>
+      </div>
+
+      <div class="tut-step" data-step="2">
+        <div class="tut-icon">𓏟</div>
+        <h3>Click a Sign</h3>
+        <p>Click any sign card to add it to your word. Signs with a <strong style="color:#e05c6e">red phoneme tag</strong> contribute to the transliteration automatically. Determinatives (no phoneme) are added silently.</p>
+      </div>
+
+      <div class="tut-step" data-step="3">
+        <div class="tut-icon">𓏟</div>
+        <h3>Multiple Phonemes</h3>
+        <p>Some signs have <strong>more than one phonetic value</strong>. When you click them, a popup appears — choose the phoneme you need, or select <em>"no phoneme"</em> to use the sign as a determinative.</p>
+      </div>
+
+      <div class="tut-step" data-step="4">
+        <div class="tut-icon" style="font-family:var(--serif);font-size:32px;color:var(--accent)">nfr</div>
+        <h3>Auto-Transliteration</h3>
+        <p>The <strong>right panel</strong> builds the transliteration automatically as you add signs. Edit it freely below — use the special character buttons (ꜣ ꜥ ḥ ḫ ẖ š ṯ ḏ…) to insert Egyptological characters.</p>
+      </div>
+
+      <div class="tut-step" data-step="5">
+        <div class="tut-icon">𓏟</div>
+        <h3>Copy & Paste</h3>
+        <p>Use the <strong>Copy</strong> buttons to copy the hieroglyphs, the transliteration, or both together — ready to paste into Word, Pages or any text editor.<br><br>Click a sign in the word display to <strong>remove</strong> it.</p>
+      </div>
+
+    </div>
+
+    <div id="tut-nav">
+      <button id="tut-prev" disabled>← Back</button>
+      <div id="tut-dots"></div>
+      <button id="tut-next">Next →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-glyph">𓏟</span>
+    <div>
+      <div class="logo-text">Gardiner's Hieroglyphs</div>
+      <div class="logo-sub">Classical Middle Egyptian · Gardiner Sign List · Transliteration</div>
+    </div>
+  </div>
+  <button id="btn-help" title="Help">?</button>
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="search" type="text" placeholder="Search sign, phoneme, description…" autocomplete="off">
+  </div>
+</header>
+
+<!-- BODY -->
+<div class="body" data-panel="main">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <!-- SIGN GRID -->
+  <main class="main" id="main">
+    <div id="section-head"></div>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <!-- WORD BUILDER -->
+  <aside class="builder">
+
+    <div class="builder-section">
+      <div class="builder-label">Word in hieroglyphs</div>
+      <div class="hier-display empty" id="hier-display"></div>
+    </div>
+
+    <div class="builder-section">
+      <div class="builder-label">Auto-transliteration</div>
+      <div class="translit-auto empty" id="translit-auto"></div>
+    </div>
+
+    <div class="builder-section">
+      <div class="builder-label">Edit transliteration</div>
+      <textarea class="translit-edit" id="translit-edit" placeholder="write or edit here…" rows="2" spellcheck="false"></textarea>
+      <div class="keys-grid" style="margin-top:8px">
+        <span class="tkey" data-char="ꜣ" title="aleph">ꜣ</span>
+        <span class="tkey" data-char="ꜥ" title="ayin">ꜥ</span>
+        <span class="tkey" data-char="ḥ">ḥ</span>
+        <span class="tkey" data-char="ḫ">ḫ</span>
+        <span class="tkey" data-char="ẖ">ẖ</span>
+        <span class="tkey" data-char="š">š</span>
+        <span class="tkey" data-char="ḳ">ḳ</span>
+        <span class="tkey" data-char="ṯ">ṯ</span>
+        <span class="tkey" data-char="ḏ">ḏ</span>
+        <span class="tkey" data-char="·" title="ponto mediano">·</span>
+      </div>
+    </div>
+
+    <div class="builder-section">
+      <div class="builder-label">Search in VÉgA</div>
+      <p class="vega-info">
+        <a href="https://vega-vocabulaire-egyptien-ancien.fr/en/the-vega/" target="_blank" rel="noopener">VÉgA</a>
+        is a scientific dictionary of Ancient Egyptian (University Paul-Valéry Montpellier 3).
+        Clicking the button below copies your transliteration and opens VÉgA - just paste it in the search bar and click the search button.
+      </p>
+      <button class="btn btn-vega disabled" id="btn-vega">
+        <span style="font-family:var(--hier)">𓂀</span> Copy &amp; open VÉgA ↗
+      </button>
+    </div>
+
+    <div class="builder-section">
+      <div class="builder-label">Copy</div>
+      <div class="btn-row">
+        <button class="btn" id="btn-hier">
+          <span>𓀀</span> Hieroglyphs
+        </button>
+        <button class="btn" id="btn-translit">
+          <span style="font-family:var(--serif)">ꜣ</span> Transliteration
+        </button>
+        <button class="btn" id="btn-both">
+          <span>⊞</span> Hieroglyphs + Transliteration
+        </button>
+        <button class="btn btn-clear" id="btn-clear">
+          <span>✕</span> Clear all
+        </button>
+      </div>
+    </div>
+
+    <div class="biblio">
+      <strong>Bibliography</strong>
+      GARDINER, Alan H. <em>Egyptian Grammar</em>. 3ª ed. Oxford: Griffith Institute, 1957.<br>
+      Unicode Consortium. <em>Egyptian Hieroglyphs</em>. Unicode 5.2+, U+13000–U+1342F.<br>
+      Google Fonts. <em>Noto Sans Egyptian Hieroglyphs</em>.
+    </div>
+
+    <div class="biblio">
+      <strong>Author</strong>
+      FLAVIA CORPAS<br>
+      GitHub: @flaflavete<br>
+      Contact: flavia.corpas@ufrj.br<br>
+      Creation Date: 05/2026
+    </div>
+
+  </aside>
+</div>
+
+<nav class="mob-tabs" id="mob-tabs">
+  <button class="mob-tab" data-panel="sidebar">Categories</button>
+  <button class="mob-tab active" data-panel="main">Signs</button>
+  <button class="mob-tab" data-panel="builder">Builder</button>
+</nav>
+
+<script>
+// ── DADOS ────────────────────────────────────────────────────
+const CATS = [
+  ['A','Man and his Occupations'],
+  ['B','Woman and her Occupations'],
+  ['C','Anthropomorphic Deities'],
+  ['D','Parts of the Human Body'],
+  ['E','Mammals'],
+  ['F','Parts of Mammals'],
+  ['G','Birds'],
+  ['H','Parts of Birds'],
+  ['I','Reptiles and Amphibians'],
+  ['K','Fish'],
+  ['L','Invertebrates'],
+  ['M','Plants and Trees'],
+  ['N','Sky, Earth, Water'],
+  ['O','Buildings and Parts'],
+  ['P','Ships and Boats'],
+  ['Q','Domestic Furniture'],
+  ['R','Temple Objects and Sacred Emblems'],
+  ['S','Crowns, Dress and Staves'],
+  ['T','Warfare, Hunting and Butchery'],
+  ['U','Agriculture, Crafts and Professions'],
+  ['V','Rope, Fibre, Baskets and Bags'],
+  ['W','Vessels of Stone and Earthenware'],
+  ['X','Loaves and Cakes'],
+  ['Y','Writing, Games and Music'],
+  ['Z','Strokes and Hieratic-derived Signs'],
+  ['Aa','Unclassified'],
+];
+
+let SIGNS = [];
+
+// ── ESTADO ─────────────────────────────────────────
+let word    = [];      // [{glyph, id, phon, desc}]
+let cat     = 'A';
+let query   = '';
+
+// ── SIDEBAR ─────────────────────────────────────────
+function buildSidebar() {
+  document.getElementById('sidebar').innerHTML = CATS.map(([id, name]) => `
+    <button class="cat-btn ${id === cat ? 'active' : ''}" data-cat="${id}">
+      <span class="cat-code">${id}</span>
+      <span class="cat-name">${name}</span>
+    </button>`).join('');
+  document.querySelectorAll('.cat-btn').forEach(btn =>
+    btn.addEventListener('click', () => {
+      cat = btn.dataset.cat;
+      query = '';
+      document.getElementById('search').value = '';
+      refresh();
+      mobSwitchPanel('main');
+    })
+  );
+}
+
+function refreshSidebar() {
+  document.querySelectorAll('.cat-btn').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.cat === cat && !query)
+  );
+}
+
+// ── GRADE DE SINAIS ──────────────────────────────────
+function getSigns() {
+  if (query) {
+    const q = query.toLowerCase();
+    return SIGNS.filter(s =>
+      s[0].toLowerCase().includes(q) ||
+      s[2].toLowerCase().includes(q) ||
+      s[3].toLowerCase().includes(q)
+    );
+  }
+  return SIGNS.filter(s =>
+    cat === 'Aa' ? s[0].startsWith('Aa') : s[0].match(new RegExp('^' + cat + '\\d'))
+  );
+}
+
+function renderGrid() {
+  const signs = getSigns();
+  const catInfo = CATS.find(c => c[0] === cat);
+
+  document.getElementById('section-head').innerHTML = query
+    ? `<p class="search-info">Results for "<strong>${esc(query)}</strong>": ${signs.length} sign(s)</p>`
+    : catInfo ? `
+      <div class="section-head">
+        <h2>${catInfo[0]} — ${catInfo[1]}</h2>
+        <p>${signs.length} signs in this category</p>
+      </div>` : '';
+
+  document.getElementById('grid').innerHTML = signs.map(([id, glyph, phon, desc]) => {
+    const phons = phon ? phon.split('|') : [];
+    const phTag = phons.length > 0
+      ? phons.map(p => `<span class="ph-tag">${p}</span>`).join('')
+      : '';
+    return `<div class="sign" data-id="${id}" data-g="${esc(glyph)}" data-ph="${esc(phon)}" data-desc="${esc(desc)}">
+      <span class="sign-g">${glyph}</span>
+      <span class="sign-id">${id}</span>
+      <span class="sign-ph-wrap">${phTag}</span>
+      <span class="sign-desc">${desc}</span>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('.sign').forEach(el =>
+    el.addEventListener('click', (e) => {
+      const phons = el.dataset.ph
+        ? el.dataset.ph.split('|').map(p => p.trim()).filter(Boolean)
+        : [];
+      if (phons.length > 1) {
+        showPicker(e, el.dataset.g, el.dataset.id, phons, el.dataset.desc);
+      } else {
+        addSign(el.dataset.g, el.dataset.id, phons[0] || '', el.dataset.desc);
+      }
+    })
+  );
+}
+
+function esc(s) { return (s || '').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+// ── WORD BUILDER ─────────────────────────────────────
+function addSign(glyph, id, phon, desc) {
+  word.push({ glyph, id, phon, desc });
+  renderBuilder();
+  closePicker();
+  mobSwitchPanel('builder');
+}
+
+// ── PHONEME PICKER ────────────────────────────────────
+function showPicker(e, glyph, id, phons, desc) {
+  closePicker();
+  const picker = document.createElement('div');
+  picker.id = 'ph-picker';
+  picker.innerHTML = `
+    <div class="pk-title">${glyph} <span>${id}</span></div>
+    <div class="pk-desc">${desc}</div>
+    <div class="pk-opts">
+      ${phons.map(p => `<button class="pk-btn" data-p="${p}">${p}</button>`).join('')}
+      <button class="pk-btn pk-det">no phoneme (det.)</button>
+    </div>`;
+
+  document.body.appendChild(picker);
+
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pw = 220, ph2 = picker.offsetHeight || 120;
+  let left = rect.left + rect.width / 2 - pw / 2;
+  let top  = rect.top - ph2 - 8;
+  if (left < 8) left = 8;
+  if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  if (top < 8) top = rect.bottom + 8;
+  picker.style.left = left + 'px';
+  picker.style.top  = top  + 'px';
+
+  picker.querySelectorAll('.pk-btn[data-p]').forEach(btn =>
+    btn.addEventListener('click', () => addSign(glyph, id, btn.dataset.p, desc))
+  );
+  picker.querySelector('.pk-det').addEventListener('click', () =>
+    addSign(glyph, id, '', desc)
+  );
+}
+
+function closePicker() {
+  const p = document.getElementById('ph-picker');
+  if (p) p.remove();
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#ph-picker') && !e.target.closest('.sign')) {
+    closePicker();
+  }
+});
+
+// ── PHONEME PICKER ────────────────────────────────────
+let pickerOpen = false;
+
+function showPicker(e, glyph, id, phons, desc) {
+  closePicker();
+  const picker = document.createElement('div');
+  picker.id = 'ph-picker';
+  picker.innerHTML = `
+    <div class="pk-title">${glyph} <span>${id}</span></div>
+    <div class="pk-desc">${desc}</div>
+    <div class="pk-opts">
+      ${phons.map(p => `<button class="pk-btn" data-p="${p}">${p}</button>`).join('')}
+      <button class="pk-btn pk-det">no phoneme (det.)</button>
+    </div>`;
+
+  document.body.appendChild(picker);
+  pickerOpen = true;
+
+  // Position near click
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pw = 220, ph2 = picker.offsetHeight || 120;
+  let left = rect.left + rect.width / 2 - pw / 2;
+  let top  = rect.top - ph2 - 8;
+  if (left < 8) left = 8;
+  if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  if (top < 8) top = rect.bottom + 8;
+  picker.style.left = left + 'px';
+  picker.style.top  = top  + 'px';
+
+  picker.querySelectorAll('.pk-btn[data-p]').forEach(btn =>
+    btn.addEventListener('click', () => addSign(glyph, id, btn.dataset.p, desc))
+  );
+  picker.querySelector('.pk-det').addEventListener('click', () =>
+    addSign(glyph, id, '', desc)
+  );
+}
+
+function closePicker() {
+  const p = document.getElementById('ph-picker');
+  if (p) p.remove();
+  pickerOpen = false;
+}
+
+document.addEventListener('click', (e) => {
+  if (pickerOpen && !e.target.closest('#ph-picker') && !e.target.closest('.sign')) {
+    closePicker();
+  }
+});
+
+function removeSign(i) {
+  word.splice(i, 1);
+  renderBuilder();
+}
+
+function renderBuilder() {
+  // hieroglyphs
+  const hd = document.getElementById('hier-display');
+  if (word.length === 0) {
+    hd.innerHTML = '';
+    hd.classList.add('empty');
+  } else {
+    hd.classList.remove('empty');
+    hd.innerHTML = word.map((s, i) =>
+      `<span class="h-token" data-i="${i}" title="${s.id} — ${s.desc}">${s.glyph}</span>`
+    ).join('');
+    hd.querySelectorAll('.h-token').forEach(t =>
+      t.addEventListener('click', () => removeSign(+t.dataset.i))
+    );
+  }
+
+  // auto transliteration
+  const phonParts = word.map(s => s.phon).filter(Boolean);
+  const ta = document.getElementById('translit-auto');
+  if (phonParts.length === 0) {
+    ta.textContent = '';
+    ta.classList.add('empty');
+  } else {
+    ta.classList.remove('empty');
+    ta.textContent = phonParts.join('');
+  }
+
+  // sync edit field only when empty or matches last auto
+  const edit = document.getElementById('translit-edit');
+  edit.value = phonParts.join('');
+  updateVegaLink();
+}
+
+function updateVegaLink() {
+  const translit = document.getElementById('translit-edit').value.trim();
+  const btn = document.getElementById('btn-vega');
+  btn.classList.toggle('disabled', !translit);
+}
+
+document.getElementById('btn-vega').addEventListener('click', function() {
+  const translit = document.getElementById('translit-edit').value.trim();
+  if (!translit) return;
+  navigator.clipboard.writeText(translit).then(() => {
+    window.open('https://app.vega-lexique.fr/', '_blank', 'noopener');
+    const orig = this.innerHTML;
+    this.innerHTML = this.innerHTML.replace(/>.+$/, '>✓ Copied — paste in VÉgA!');
+    this.classList.add('success');
+    setTimeout(() => { this.innerHTML = orig; this.classList.remove('success'); }, 2000);
+  });
+});
+
+// ── SPECIAL KEYS ────────────────────────────────────
+document.querySelectorAll('.tkey').forEach(key =>
+  key.addEventListener('click', () => {
+    const el = document.getElementById('translit-edit');
+    const start = el.selectionStart, end = el.selectionEnd;
+    const ch = key.dataset.char;
+    el.value = el.value.slice(0, start) + ch + el.value.slice(end);
+    el.selectionStart = el.selectionEnd = start + ch.length;
+    el.focus();
+    updateVegaLink();
+  })
+);
+
+// ── COPY ────────────────────────────────────────────
+function copyAndFlash(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = btn.innerHTML.replace(/>.+$/, '>✓ Copied!');
+    btn.classList.add('success');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('success'); }, 1400);
+  });
+}
+
+document.getElementById('btn-hier').addEventListener('click', function() {
+  copyAndFlash(word.map(s => s.glyph).join(''), this);
+});
+document.getElementById('btn-translit').addEventListener('click', function() {
+  copyAndFlash(document.getElementById('translit-edit').value, this);
+});
+document.getElementById('btn-both').addEventListener('click', function() {
+  const h = word.map(s => s.glyph).join('');
+  const t = document.getElementById('translit-edit').value;
+  copyAndFlash(h + '\n' + t, this);
+});
+document.getElementById('btn-clear').addEventListener('click', () => {
+  word = [];
+  document.getElementById('translit-edit').value = '';
+  renderBuilder();
+});
+
+document.getElementById('translit-edit').addEventListener('input', updateVegaLink);
+
+// ── SEARCH ──────────────────────────────────────────
+document.getElementById('search').addEventListener('input', function() {
+  query = this.value.trim();
+  refresh();
+});
+
+// ── REFRESH ─────────────────────────────────────────
+function refresh() {
+  refreshSidebar();
+  renderGrid();
+}
+
+
+
+
+// ── TUTORIAL & WELCOME ───────────────────────────────────────
+const TOTAL_STEPS = 5;
+let tutStep = 1;
+
+function showTutorial() {
+  document.getElementById('tutorial-overlay').hidden = false;
+  tutStep = 1;
+  renderTutStep();
+}
+function hideTutorial() {
+  document.getElementById('tutorial-overlay').hidden = true;
+}
+
+function renderTutStep() {
+  document.querySelectorAll('.tut-step').forEach(s =>
+    s.classList.toggle('active', +s.dataset.step === tutStep)
+  );
+  document.getElementById('tut-prev').disabled = tutStep === 1;
+  const next = document.getElementById('tut-next');
+  if (tutStep === TOTAL_STEPS) {
+    next.textContent = 'Got it ✓';
+    next.classList.add('finish');
+  } else {
+    next.textContent = 'Next →';
+    next.classList.remove('finish');
+  }
+  // dots
+  const dots = document.getElementById('tut-dots');
+  dots.innerHTML = Array.from({length: TOTAL_STEPS}, (_,i) =>
+    `<div class="tut-dot ${i+1 === tutStep ? 'active' : ''}"></div>`
+  ).join('');
+}
+
+document.getElementById('tut-prev').addEventListener('click', () => { if (tutStep > 1) { tutStep--; renderTutStep(); } });
+document.getElementById('tut-next').addEventListener('click', () => {
+  if (tutStep < TOTAL_STEPS) { tutStep++; renderTutStep(); }
+  else hideTutorial();
+});
+document.getElementById('tut-close').addEventListener('click', hideTutorial);
+document.getElementById('tutorial-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('tutorial-overlay')) hideTutorial();
+});
+document.getElementById('btn-help').addEventListener('click', showTutorial);
+
+// Welcome popup — only on first visit (unless ?reset in URL)
+if (new URLSearchParams(location.search).has('reset')) {
+  localStorage.removeItem('gardiner-welcomed');
+}
+
+if (localStorage.getItem('gardiner-welcomed')) {
+  document.getElementById('welcome-overlay').remove();
+} else {
+  document.getElementById('welcome-yes').addEventListener('click', () => {
+    document.getElementById('welcome-overlay').remove();
+    localStorage.setItem('gardiner-welcomed', '1');
+    showTutorial();
+  });
+  document.getElementById('welcome-no').addEventListener('click', () => {
+    document.getElementById('welcome-overlay').remove();
+    localStorage.setItem('gardiner-welcomed', '1');
+  });
+}
+
+// ── MOBILE TABS ──────────────────────────────────────
+const _body = document.querySelector('.body');
+
+function mobSwitchPanel(panel) {
+  if (window.innerWidth > 640) return;
+  _body.dataset.panel = panel;
+  document.querySelectorAll('.mob-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.panel === panel)
+  );
+}
+
+document.getElementById('mob-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.mob-tab');
+  if (btn) mobSwitchPanel(btn.dataset.panel);
+});
+
+// ── INIT ────────────────────────────────────────────
+SIGNS = window.GARDINER_DATA;
+buildSidebar();
+renderBuilder();
+renderGrid();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+
+
+</body>
+</html>
